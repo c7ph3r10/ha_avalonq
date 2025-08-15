@@ -1,6 +1,6 @@
 # ha_avalonq
 This repository is a simple template definition to create entities for the Canaan Avalon Q Home Miner to monitor and control the device.<br>
-Using those entities it is possible to build dashboards (not included example) e.g. like this:
+Using those entities it is possible to build dashboards (example not included) e.g. like this:
 
 **Condensed View:**<br>
 <img width="1666" height="448" alt="grafik" src="https://github.com/user-attachments/assets/aba2b63d-e7e0-4f3e-8b0f-ce308cfd37e3" />
