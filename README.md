@@ -101,7 +101,7 @@ homeassistant:
 - Step 4: Do the following search/replace within the avalonq.yaml to adjust it to your environment
 
 Replace \<IP-ADDRESS\> with the ip-address of your avalon q home miner<br>
-Replace \<DEVICE NAME\> with the name the miner template entites shall us as prefix. Keep it short an simple. No blanks.
+Replace \<DEVICE NAME\> with the name the miner template entites shall us as prefix. Keep it short and simple. No blanks.
 
 - Step 5: Restart home assistant and check for the new entities. They should be shown under helper entities.
 
