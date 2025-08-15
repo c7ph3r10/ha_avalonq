@@ -1,0 +1,873 @@
+miners_<DEVICE NAME>:
+
+  shell_command:
+  
+    # set miners workmode
+#    set_<DEVICE NAME>_workmode: >-
+#      /bin/bash -c "echo 'ascset|0,workmode,set,{{ {'Eco': 0, 'Standard': 1, 'Super': 2}[states('input_select.<DEVICE NAME>')] }}' | nc -w 2 <IP-ADDRESS> 4028"
+
+    # wake up miner from standby. It will return to it´s recent workmode
+    set_<DEVICE NAME>_softon: >-
+      /bin/bash -c "echo 'ascset|0,softon,1:$(( $(date +%s) + 5 ))' | nc -w 2 <IP-ADDRESS> 4028"
+
+    # send miner to standby
+    set_<DEVICE NAME>_softoff: >-
+      /bin/bash -c "echo 'ascset|0,softoff,1:$(( $(date +%s) + 5 ))' | nc -w 2 <IP-ADDRESS> 4028"
+
+    # turn on LCD screen
+    set_<DEVICE NAME>_lcdon: >-
+      /bin/bash -c "echo 'ascset|0,lcd,0:1' | nc -w 2 <IP-ADDRESS> 4028"
+
+    # turn off LCD screen
+    set_<DEVICE NAME>_lcdoff: >-
+      /bin/bash -c "echo 'ascset|0,lcd,0:0' | nc -w 2 <IP-ADDRESS> 4028"
+
+    # trigger reboot
+    set_<DEVICE NAME>_reboot: >-
+      /bin/bash -c "echo 'ascset|0,reboot,0' | nc -w 2 <IP-ADDRESS> 4028"
+
+  command_line:
+  
+      # monitors wheather the miners api interface is available
+    - binary_sensor:
+        unique_id: <DEVICE NAME>.Available
+        name: "<DEVICE NAME>.Available"
+        command: "echo '{\"command\": \"summary\"}' | nc -w 2 <IP-ADDRESS> 4028 > /dev/null && echo online || echo offline"
+        payload_on: "online"
+        payload_off: "offline"
+        device_class: connectivity
+        scan_interval: 5
+        icon: >-
+          {% if value == 'online' %}
+            mdi:ethernet
+          {% else %}
+            mdi:ethernet-off
+          {% endif %}
+
+    # get JSON response from cgminer command 'stats'
+    - sensor: 
+        unique_id: <DEVICE NAME>.api.stats
+        name: "<DEVICE NAME>.api.stats"
+        icon: mdi:code-json
+        command_timeout: 3
+        command: >
+          output=$(echo '{"command": "stats"}' | nc -w 2 <IP-ADDRESS> 4028);
+          if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
+        scan_interval: 30
+        value_template: >
+          {% if value_json is defined and value_json.STATS is defined %}
+            OK
+          {% else %}
+            Error
+          {% endif %}
+        json_attributes:
+          - STATS
+
+    # get JSON response from cgminer command 'litestats'
+    - sensor: 
+        unique_id: <DEVICE NAME>.api.litestats
+        name: "<DEVICE NAME>.api.litestats"
+        icon: mdi:code-json
+        command_timeout: 3
+        command: >
+          output=$(echo '{"command": "litestats"}' | nc -w 2 <IP-ADDRESS> 4028);
+          if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
+        scan_interval: 15
+        value_template: >
+          {% if value_json is defined and value_json.STATS is defined %}
+            OK
+          {% else %}
+            Error
+          {% endif %}
+        json_attributes:
+          - STATS
+
+    # get JSON response from cgminer command 'coin'
+    - sensor: 
+        unique_id: <DEVICE NAME>.api.coin
+        name: "<DEVICE NAME>.api.coin"
+        icon: mdi:code-json
+        command_timeout: 3
+        command: >
+          output=$(echo '{"command": "coin"}' | nc -w 2 <IP-ADDRESS> 4028);
+          if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
+        scan_interval: 30
+        value_template: >
+          {% if value_json is defined and value_json.COIN is defined %}
+            OK
+          {% else %}
+            Error
+          {% endif %}
+        json_attributes:
+          - COIN
+
+    # get JSON response from cgminer command 'summary'
+    - sensor: 
+        unique_id: <DEVICE NAME>.api.summary
+        name: "<DEVICE NAME>.api.summary"
+        icon: mdi:code-json
+        command_timeout: 3
+        command: >
+          output=$(echo '{"command": "summary"}' | nc -w 2 <IP-ADDRESS> 4028);
+          if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
+        scan_interval: 30
+        value_template: >
+          {% if value_json is defined and value_json.SUMMARY is defined %}
+            OK
+          {% else %}
+            Error
+          {% endif %}
+        json_attributes:
+          - SUMMARY
+
+    # get JSON response from cgminer command 'pools'
+    - sensor: 
+        unique_id: <DEVICE NAME>.api.pools
+        name: "<DEVICE NAME>.api.pools"
+        icon: mdi:code-json
+        command_timeout: 3
+        command: >
+          output=$(echo '{"command": "pools"}' | nc -w 2 <IP-ADDRESS> 4028);
+          if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
+        scan_interval: 30
+        value_template: >
+          {% if value_json is defined and value_json.POOLS is defined %}
+            OK
+          {% else %}
+            Error
+          {% endif %}
+        json_attributes:
+          - POOLS
+
+    # get JSON response from cgminer command 'devs'
+    - sensor: 
+        unique_id: <DEVICE NAME>.api.devs
+        name: "<DEVICE NAME>.api.devs"
+        icon: mdi:code-json
+        command_timeout: 3
+        command: >
+          output=$(echo '{"command": "devs"}' | nc -w 2 <IP-ADDRESS> 4028);
+          if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
+        scan_interval: 30
+        value_template: >
+          {% if value_json is defined and value_json.DEVS is defined %}
+            OK
+          {% else %}
+            Error
+          {% endif %}
+        json_attributes:
+          - DEVS
+
+    # get JSON response from cgminer command 'devdetails'
+    - sensor: 
+        unique_id: <DEVICE NAME>.api.devdetails
+        name: "<DEVICE NAME>.api.devdetails"
+        icon: mdi:code-json
+        command_timeout: 3
+        command: >
+          output=$(echo '{"command": "devdetails"}' | nc -w 2 <IP-ADDRESS> 4028);
+          if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
+        scan_interval: 30
+        value_template: >
+          {% if value_json is defined and value_json.DEVDETAILS is defined %}
+            OK
+          {% else %}
+            Error
+          {% endif %}
+        json_attributes:
+          - DEVDETAILS
+          
+    # get JSON response from cgminer command 'version'
+    - sensor: 
+        unique_id: <DEVICE NAME>.api.version
+        name: "<DEVICE NAME>.api.version"
+        icon: mdi:code-json
+        command_timeout: 3
+        command: >
+          output=$(echo '{"command": "version"}' | nc -w 2 <IP-ADDRESS> 4028);
+          if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
+        scan_interval: 30
+        value_template: >
+          {% if value_json is defined and value_json.VERSION is defined %}
+            OK
+          {% else %}
+            Error
+          {% endif %}
+        json_attributes:
+          - VERSION
+
+    # get JSON response from cgminer command 'config'
+    - sensor: 
+        unique_id: <DEVICE NAME>.api.config
+        name: "<DEVICE NAME>.api.config"
+        icon: mdi:code-json
+        command_timeout: 3
+        command: >
+          output=$(echo '{"command": "config"}' | nc -w 2 <IP-ADDRESS> 4028);
+          if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
+        scan_interval: 30
+        value_template: >
+          {% if value_json is defined and value_json.CONFIG is defined %}
+            OK
+          {% else %}
+            Error
+          {% endif %}
+        json_attributes:
+          - CONFIG
+
+#
+# creates template entities extracting respective data from the JSON responses
+#
+  template:
+
+    - switch:
+        - unique_id: <DEVICE NAME>.LcdOnOff.Switch
+          name: "<DEVICE NAME>.LcdOnOff.Switch"
+          state: "{{ is_state('binary_sensor.<DEVICE NAME>_lcdonoff_status', 'on') }}"
+          turn_on:
+            - action: shell_command.set_<DEVICE NAME>_lcdon
+            - delay: 1
+            - action: homeassistant.update_entity
+              target:
+                entity_id: sensor.<DEVICE NAME>_api_litestats
+          turn_off:
+            - action: shell_command.set_<DEVICE NAME>_lcdoff
+            - delay: 1
+            - action: homeassistant.update_entity
+              target:
+                entity_id: sensor.<DEVICE NAME>_api_litestats            
+
+    - binary_sensor:
+      
+      # actual on/off state of the LCD display
+      - unique_id: <DEVICE NAME>.LcdOnOff.Status
+        name: "<DEVICE NAME>.LcdOnOff.Status"
+        icon: mdi:overscan
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% if stats %}
+                {% set summary = stats[0].get('MM ID0:Summary', '') %}
+                {% set match = summary | regex_findall('LcdOnoff\\[(\\d)\\]') %}
+                {{ 'on' if match and match[0] == '1' else 'off' }}
+            {% else %}
+                off
+            {% endif %}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # actual pool connection state
+      - unique_id: <DEVICE NAME>.Pool_Status
+        name: "<DEVICE NAME>.Pool_Status"
+        device_class: connectivity
+        state: >
+            {% set pools = state_attr('sensor.<DEVICE NAME>_api_pools', 'POOLS') %}
+            {% set status = pools[0]['Status'] if pools and pools[0] is defined and 'Status' in pools[0] else 'unknown' %}
+            {{ 'on' if status == 'Alive' else 'off' }}
+        icon: >
+            {% set pools = state_attr('sensor.<DEVICE NAME>_api_pools', 'POOLS') %}
+            {% set status = pools[0]['Status'] if pools and pools[0] is defined and 'Status' in pools[0] else 'unknown' %}
+            {{ 'mdi:link-variant' if status == 'Alive' else 'mdi:link-variant-off' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_pools', 'OK') }}
+        
+    - sensor:
+    
+      # actual system status (text)
+      - unique_id: <DEVICE NAME>.Systemstatus
+        name: "<DEVICE NAME>.Systemstatus"
+        icon: mdi:comment-text-outline
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]['MM ID0:Summary'] if stats and stats[0] is defined and 'MM ID0:Summary' in stats[0] else '' %}
+            {% set match = summary | regex_findall('SYSTEMSTATU\\[([^\\]]+)\\]') %}
+            {{ match[0] if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # actual system status (number)
+      - unique_id: <DEVICE NAME>.State
+        name: "<DEVICE NAME>.State"
+        icon: mdi:list-status
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]['MM ID0:Summary'] if stats and stats[0] is defined and 'MM ID0:Summary' in stats[0] else '' %}
+            {% set match = summary | regex_findall('STATE\\[([^\\]]+)\\]') %}
+            {{ match[0] if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # uptime of the device in format xhour yminutes
+      - unique_id: <DEVICE NAME>.Uptime
+        name: "<DEVICE NAME>.Uptime"
+        icon: mdi:timer-outline
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]['MM ID0:Summary'] if stats and stats[0] is defined and 'MM ID0:Summary' in stats[0] else '' %}
+            {% set match = summary | regex_findall('Elapsed\\[([^\\]]+)\\]') %}
+            {% if match %}
+                {% set seconds = match[0] | float | int %}
+                {% set h = seconds // 3600 %}
+                {% set m = (seconds % 3600) // 60 %}
+                {{ h }}h {{ m }}m
+            {% else %}
+                n/a
+            {% endif %}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # CPU model of the device
+      - unique_id: <DEVICE NAME>.CPU_Model
+        name: "<DEVICE NAME>.CPU_Model"
+        icon: mdi:memory
+        state: >
+          {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+          {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+          {% set match = summary | regex_findall('CPU\\[([^\\]]+)\\]') %}
+          {{ match[0] if match else 'n/a' }}
+        availability: >
+          {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # ASIC model of the chips
+      - unique_id: <DEVICE NAME>.ASIC_Model
+        name: "<DEVICE NAME>.ASIC_Model"
+        icon: mdi:chip
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('Core\\[([^\\]]+)\\]') %}
+            {{ match[0] if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # actual CPU frequency
+      - unique_id: <DEVICE NAME>.CPU_Freq
+        name: "<DEVICE NAME>.CPU_Freq"
+        icon: mdi:sine-wave
+        unit_of_measurement: "MHz"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('Freq\\[([^\\]]+)\\]') %}
+            {{ match[0] | float if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # unique ID of the device          
+      - unique_id: <DEVICE NAME>.ID
+        name: "<DEVICE NAME>.ID"
+        icon: mdi:id-card
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('DNA\\[([^\\]]+)\\]') %}
+            {{ match[0] if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+
+      # power output for the current workmode
+      - unique_id: <DEVICE NAME>.Mode_Power_Output
+        name: "<DEVICE NAME>.Mode_Power_Output"
+        icon: mdi:lightning-bolt
+        unit_of_measurement: "W"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('MPO\\[([^\\]]+)\\]') %}
+            {{ match[0] | int if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # current temperature inside the device
+      - unique_id: <DEVICE NAME>.ITemp
+        name: "<DEVICE NAME>.ITemp"
+        icon: mdi:thermometer
+        device_class: temperature
+        unit_of_measurement: "°C"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('ITemp\\[(\\d+)\\]') %}
+            {{ match[0] | float if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # current hashboard inlet temperature
+      - unique_id: <DEVICE NAME>.HBITemp
+        name: "<DEVICE NAME>.HBITemp"
+        icon: mdi:thermometer
+        device_class: temperature
+        unit_of_measurement: "°C"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('HBITemp\\[(\\d+)\\]') %}
+            {{ match[0] | float if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # current hashboard outlet temperature
+      - unique_id: <DEVICE NAME>.HBOTemp
+        name: "<DEVICE NAME>.HBOTemp"
+        icon: mdi:thermometer
+        device_class: temperature
+        unit_of_measurement: "°C"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('HBOTemp\\[(\\d+)\\]') %}
+            {{ match[0] | float if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # max hashboard chip temperature
+      - unique_id: <DEVICE NAME>.TMax
+        name: "<DEVICE NAME>.TMax"
+        icon: mdi:thermometer-high
+        device_class: temperature
+        unit_of_measurement: "°C"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('TMax\\[(\\d+)\\]') %}
+            {{ match[0] | float if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # avg hashboard chip temperature
+      - unique_id: <DEVICE NAME>.TAvg
+        name: "<DEVICE NAME>.TAvg"
+        icon: mdi:thermometer-auto
+        device_class: temperature
+        unit_of_measurement: "°C"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('TAvg\\[(\\d+)\\]') %}
+            {{ match[0] | float if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # target hashboard chip temperature
+      - unique_id: <DEVICE NAME>.TarT
+        name: "<DEVICE NAME>.TarT"
+        icon: mdi:thermometer-check
+        device_class: temperature
+        unit_of_measurement: "°C"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('TarT\\[(\\d+)\\]') %}
+            {{ match[0] | float if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # speed fan 1 (rpm)
+      - unique_id: <DEVICE NAME>.Fan1
+        name: "<DEVICE NAME>.Fan1"
+        icon: mdi:fan
+        unit_of_measurement: "rpm"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('Fan1\\[(\\d+)\\]') %}
+            {{ match[0] | int if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # speed fan 2 (rpm)
+      - unique_id: <DEVICE NAME>.Fan2
+        name: "<DEVICE NAME>.Fan2"
+        icon: mdi:fan
+        unit_of_measurement: "rpm"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('Fan2\\[(\\d+)\\]') %}
+            {{ match[0] | int if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # speed fan 3 (rpm)
+      - unique_id: <DEVICE NAME>.Fan3
+        name: "<DEVICE NAME>.Fan3"
+        icon: mdi:fan
+        unit_of_measurement: "rpm"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('Fan3\\[(\\d+)\\]') %}
+            {{ match[0] | int if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # speed fan 4 (rpm)
+      - unique_id: <DEVICE NAME>.Fan4
+        name: "<DEVICE NAME>.Fan4"
+        icon: mdi:fan
+        unit_of_measurement: "rpm"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('Fan4\\[(\\d+)\\]') %}
+            {{ match[0] | int if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # relative fan speed total (%) 
+      - unique_id: <DEVICE NAME>.FanR
+        name: "<DEVICE NAME>.FanR"
+        icon: mdi:fan
+        unit_of_measurement: "%"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('FanR\\[(\\d+)%\\]') %}
+            {{ match[0] | int if match else 0 }}
+
+      # filter runtime (min)
+      - unique_id: <DEVICE NAME>.Filter
+        name: "<DEVICE NAME>.Filter"
+        icon: mdi:air-filter
+        device_class: duration
+        unit_of_measurement: "min"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('Filter\\[(\\d+)\\]') %}
+            {{ match[0] | int if match else 0 }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # total number of network errors since startup
+      - unique_id: <DEVICE NAME>.Network_Errors
+        name: "<DEVICE NAME>.Network_Errors"
+        unit_of_measurement: " "
+        icon: mdi:lan
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('NetFail\\[([^\\]]+)\\]') %}
+            {% if match %}
+                {% set values = match[0].split() %}
+                {{ values | map('int') | sum }}
+            {% else %}
+                0
+            {% endif %}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # current hashrate (TH/s)
+      - unique_id: <DEVICE NAME>.THSspd
+        name: "<DEVICE NAME>.THSspd"
+        icon: mdi:speedometer
+        unit_of_measurement: "TH/s"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('GHSspd\\[(\\d+\\.\\d+)\\]') %}
+            {{ (match[0] | float / 1000) | round(2) if match else 0 }}
+
+      # number of total ASICS on the hashboard
+      - unique_id: <DEVICE NAME>.Total_ASICs
+        name: "<DEVICE NAME>.Total_ASICs"
+        icon: mdi:chip
+        unit_of_measurement: " "
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('TA\\[[^\\]]*?(\\d+)\\]') %}
+            {{ match[-1] | int if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # current load of the device
+      - unique_id: <DEVICE NAME>.Cur_Load
+        name: "<DEVICE NAME>.Cur_Load"
+        icon: mdi:flash
+        device_class: power
+        unit_of_measurement: "W"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('PS\\[[^\\]]*?(\\d+)\\]') %}
+            {{ match[-1] | int if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # fan error state (true/false)
+      - unique_id: <DEVICE NAME>.FanErr
+        name: "<DEVICE NAME>.FanErr"
+        icon: mdi:fan-alert
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('FanErr\\[([^\\]]+)\\]') %}
+            {% if match and match[0] == '1' %}
+              1
+            {% else %}
+              0
+            {% endif %}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # current efficiency ratio power to hashrate (J/TH)
+      - unique_id: <DEVICE NAME>.Energy_per_TH
+        name: "<DEVICE NAME>.Energy_per_TH"
+        icon: mdi:lightning-bolt
+        unit_of_measurement: "J/TH"
+        state: >
+            {% set power = states('sensor.<DEVICE NAME>_Cur_Load') | float(0) %}
+            {% set hashrate = states('sensor.<DEVICE NAME>_thsspd') | float(0) %}
+            {% if hashrate > 0 %}
+              {{ (power / hashrate) | round(2) }}
+            {% else %}
+              0
+            {% endif %}
+
+      # current pool network latency
+      - unique_id: <DEVICE NAME>.Ping
+        name: "<DEVICE NAME>.Ping"
+        icon: mdi:progress-clock
+        device_class: duration
+        unit_of_measurement: "ms"
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('PING\\[(\\d+)\\]') %}
+            {{ match[0] | int if match else 0 }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # actual worklevel status
+      - unique_id: <DEVICE NAME>.Worklevel
+        name: "<DEVICE NAME>.Worklevel"
+        icon: mdi:cog-play-outline
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set match = summary | regex_findall('WORKLEVEL\\[([^\\]]+)\\]') %}
+            {{ match[0] if match else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+          
+      # actual workmode status
+      - unique_id: <DEVICE NAME>.Workmode.Status
+        name: "<DEVICE NAME>.Workmode.Status"
+        icon: mdi:cog-play-outline
+        state: >
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+
+            {% if "Work: In Idle" in summary %}
+                Aus
+            {% else %}
+                {% set match = summary | regex_findall('WORKMODE\\[(\\d+)\\]') %}
+                {% if match %}
+                    {% set mode = match[0] %}
+                    {% if mode == '0' %}
+                        Eco
+                    {% elif mode == '1' %}
+                        Standard
+                    {% elif mode == '2' %}
+                        Super
+                    {% else %}
+                        n/a
+                    {% endif %}
+                {% else %}
+                    n/a
+                {% endif %}
+            {% endif %}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # current blockchain network difficulty
+      - unique_id: <DEVICE NAME>.Network_Difficulty
+        name: "<DEVICE NAME>.Network_Difficulty"
+        icon: mdi:calculator-variant-outline
+        unit_of_measurement: "T"
+        state: >
+            {% set coin = state_attr('sensor.<DEVICE NAME>_api_coin', 'COIN') %}
+            {% if coin and 'Network Difficulty' in coin[0] %}
+                {% set difficulty = coin[0]['Network Difficulty'] | float %}
+                {{ (difficulty / 1_000_000_000_000) | round(2) }}
+            {% else %}
+                n/a
+            {% endif %}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_coin', 'OK') }}
+
+      # number of found blocks by the device
+      - unique_id: <DEVICE NAME>.Found_Blocks
+        name: "<DEVICE NAME>.Found_Blocks"
+        icon: mdi:cube-outline
+        state: >
+            {% set summary = state_attr('sensor.<DEVICE NAME>_api_summary', 'SUMMARY') %}
+            {% if summary and 'Found Blocks' in summary[0] %}
+                {{ summary[0]['Found Blocks'] | int }}
+            {% endif %}
+
+      # total number of hardware errors since startup
+      - unique_id: <DEVICE NAME>.Hardware_Errors
+        name: "<DEVICE NAME>.Hardware_Errors"
+        icon: mdi:alert-outline
+        unit_of_measurement: " "
+        state: >
+            {% set summary = state_attr('sensor.<DEVICE NAME>_api_summary', 'SUMMARY') %}
+            {% if summary and 'Hardware Errors' in summary[0] %}
+                {{ summary[0]['Hardware Errors'] | int }}
+            {% else %}
+                0
+            {% endif %}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_summary', 'OK') }}
+
+      # avg number of shares per minute
+      - unique_id: <DEVICE NAME>.Avg_Shares_per_Min
+        name: "<DEVICE NAME>.Avg_Shares_per_Min"
+        icon: mdi:timer-outline
+        unit_of_measurement: " "
+        state: >
+            {% set summary = state_attr('sensor.<DEVICE NAME>_api_summary', 'SUMMARY') %}
+            {% if summary and 'Utility' in summary[0] %}
+                {{ summary[0]['Utility'] | float }}
+            {% else %}
+                0
+            {% endif %}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_summary', 'OK') }}
+
+      # ratio of hardware errors to total number of shares
+      - unique_id: <DEVICE NAME>.Hardware_ErrorsR
+        name: "<DEVICE NAME>.Hardware_ErrorsR"
+        icon: mdi:alert-outline
+        unit_of_measurement: "%"
+        state: >
+            {% set summary = state_attr('sensor.<DEVICE NAME>_api_summary', 'SUMMARY') %}
+            {% if summary and 'Device Hardware%' in summary[0] %}
+                {{ summary[0]['Device Hardware%'] | float | round(2) }}
+            {% else %}
+                0
+            {% endif %}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_summary', 'OK') }}
+
+      # URL of the pool
+      - unique_id: <DEVICE NAME>.Pool
+        name: "<DEVICE NAME>.Pool"
+        icon: mdi:pool
+        state: >
+            {% set pools = state_attr('sensor.<DEVICE NAME>_api_pools', 'POOLS') %}
+            {{ pools[0]['Stratum URL'] if pools and 'Stratum URL' in pools[0] else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_pools', 'OK') }}
+
+      # total number of accepted shares since startup
+      - unique_id: <DEVICE NAME>.Accepted_Shares
+        name: "<DEVICE NAME>.Accepted_Shares"
+        icon: mdi:sticker-check
+        unit_of_measurement: " "
+        state: >
+            {% set pools = state_attr('sensor.<DEVICE NAME>_api_pools', 'POOLS') %}
+            {{ pools[0]['Accepted'] | int if pools and 'Accepted' in pools[0] else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_pools', 'OK') }}
+
+      # total number of rejected shares since startup
+      - unique_id: <DEVICE NAME>.Rejected_Shares
+        name: "<DEVICE NAME>.Rejected_Shares"
+        icon: mdi:sticker-remove-outline
+        unit_of_measurement: " "
+        state: >
+            {% set pools = state_attr('sensor.<DEVICE NAME>_api_pools', 'POOLS') %}
+            {{ pools[0]['Rejected'] | int if pools and 'Rejected' in pools[0] else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_pools', 'OK') }}
+
+      # pool rejection rate
+      - unique_id: <DEVICE NAME>.Rejection_Rate
+        name: "<DEVICE NAME>.Rejection_Rate"
+        icon: mdi:trash-can-outline
+        unit_of_measurement: "%"
+        state: >
+            {% set pools = state_attr('sensor.<DEVICE NAME>_api_pools', 'POOLS') %}
+            {% if pools and 'Pool Rejected%' in pools[0] %}
+                {{ pools[0]['Pool Rejected%'] | float | round(2) }}
+            {% else %}
+                n/a
+            {% endif %}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_pools', 'OK') }}
+
+      # time elapsed since latest share accepted
+      - unique_id: <DEVICE NAME>.Latest_Share
+        name: "<DEVICE NAME>.Latest_Share"
+        icon: mdi:clock-check
+        unit_of_measurement: "s"
+        device_class: duration
+        state: >
+            {% set pools = state_attr('sensor.<DEVICE NAME>_api_pools', 'POOLS') %}
+            {% set stats = state_attr('sensor.<DEVICE NAME>_api_litestats', 'STATS') %}
+            {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
+            {% set uptime_match = summary | regex_findall('Elapsed\\[([^\\]]+)\\]') %}
+            {% set uptime = uptime_match[0] | int(0) if uptime_match else 0 %}
+            {% if pools and 'Last Share Time' in pools[0] %}
+                {% set share_time = pools[0]['Last Share Time'] | int(0) %}
+                {% set diff = uptime - share_time %}
+                {{ diff | int }}
+            {% else %}
+                n/a
+            {% endif %}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_pools', 'OK') and is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+
+      # current stratum difficulty in G
+      - unique_id: <DEVICE NAME>.Stratum_Difficulty
+        name: "<DEVICE NAME>.Stratum_Difficulty"
+        icon: mdi:calculator-variant-outline
+        unit_of_measurement: " "
+        state: >
+            {% set pools = state_attr('sensor.<DEVICE NAME>_api_pools', 'POOLS') %}
+            {{ (pools[0]['Stratum Difficulty'] | float) | round(2) if pools and 'Stratum Difficulty' in pools[0] else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_pools', 'OK') }}
+
+      # CGMiner Software Version
+      - unique_id: <DEVICE NAME>.CGMiner_Version
+        name: "<DEVICE NAME>.CGMiner_Version"
+        icon: mdi:counter
+        state: >
+            {% set version_data = state_attr('sensor.<DEVICE NAME>_api_version', 'VERSION') %}
+            {{ version_data[0]['CGMiner'] if version_data and 'CGMiner' in version_data[0] else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_version', 'OK') }}
+
+      # API Version
+      - unique_id: <DEVICE NAME>.API_Version.Status
+        name: "<DEVICE NAME>.API_Version.Status"
+        icon: mdi:api
+        state: >
+            {% set version = state_attr('sensor.<DEVICE NAME>_api_version', 'VERSION') %}
+            {{ version[0]['API'] if version and 'API' in version[0] else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_version', 'OK') }}
+
+      # Firmware Version
+      - unique_id: <DEVICE NAME>.Firmware
+        icon: mdi:chip
+        name: "<DEVICE NAME>.Firmware"
+        state: >
+            {% set version = state_attr('sensor.<DEVICE NAME>_api_version', 'VERSION') %}
+            {{ version[0]['LVERSION'] if version and 'LVERSION' in version[0] else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_version', 'OK') }}
+          
+      # Ethernet MAC Address of the device
+      - unique_id: <DEVICE NAME>.MAC_Address
+        name: "<DEVICE NAME>.MAC_Address"
+        icon: mdi:ethernet
+        state: >
+            {% set version = state_attr('sensor.<DEVICE NAME>_api_version', 'VERSION') %}
+            {{ version[0]['MAC'] if version and 'MAC' in version[0] else 'n/a' }}
+        availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_version', 'OK') }}
