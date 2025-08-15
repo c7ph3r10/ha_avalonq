@@ -106,4 +106,4 @@ Replace \<DEVICE NAME\> with the name the miner template entites shall us as pre
 - Step 5: Restart home assistant and check for the new entities. They should be shown under helper entities.
 
 If you have more than one Canaan Avalon Q Home Miner you will need one copy of avalonq.yaml per device.<br>
-Make sure the above mentioned device name and of course also the file name are unique.
+Make sure the above mentioned device names and of course also the file names are unique.
