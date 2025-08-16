@@ -48,9 +48,9 @@ set_&ltDEVICE NAME&gt;_reboot           Reboot the device
 &ltDEVICE NAME&gt;.State                (sensor) Actual system status as a number
 &ltDEVICE NAME&gt;.Uptime               (sensor) Uptime since last start in format x hour y minutes
 &ltDEVICE NAME&gt;.CPU_Model            (sensor) Miners CPU model
-&ltDEVICE NAME&gt;.ASIC_Model           (sensor) Mners ASIC model
+&ltDEVICE NAME&gt;.ASIC_Model           (sensor) Miners ASIC model
 &ltDEVICE NAME&gt;.CPU_Freq             (sensor) Miners CPU frequency
-&ltDEVICE NAME&gt;.ID                   (sensor) Manufactureres unique id of the device
+&ltDEVICE NAME&gt;.ID                   (sensor) Manufacturers unique id of the device
 &ltDEVICE NAME&gt;.Mode_Power_Output    (sensor) Setpoint power output for the current workmode (Eco = 800W, Standard = 1300W, Super = 1600W)
 &ltDEVICE NAME&gt;.ITemp                (sensor) Temperature inside the miners chassis
 &ltDEVICE NAME&gt;.HBITemp              (sensor) Inlet temperature of the hashboard
