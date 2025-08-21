@@ -97,7 +97,7 @@ set_&ltDEVICE NAME&gt;_reboot           Reboot the device
 homeassistant:
   packages: !include_dir_merge_named packages
 </pre>
-- Step 3: Create a copy of the avalonq.yaml from this repository and copy it to the packages folder created before.
+- Step 3: Copy the avalonq.yaml from this repository to the packages folder.
 - Step 4: Do the following search/replace within the avalonq.yaml to adjust it to your environment
 
 Replace \<IP-ADDRESS\> with the ip-address of your avalon q home miner<br>
@@ -105,5 +105,5 @@ Replace \<DEVICE NAME\> with the name the miner template entites shall us as pre
 
 - Step 5: Restart home assistant and check for the new entities. They should be shown under helper entities.
 
-If you have more than one Canaan Avalon Q Home Miner you will need one copy of avalonq.yaml per device.<br>
+If you have more than one Canaan Avalon Q Home Miner you will need a copy of avalonq.yaml per device.<br>
 Make sure the above mentioned device names and of course also the file names are unique.
