@@ -17,7 +17,7 @@ The avalonq.yaml template definition file creates the following (helper) entitie
 
 **Shell Commands:**<br>
 <pre>
-set_&ltDEVICE NAME&gt;_workmode:        SETTING THE WORKMODE WILL BE ADDED. HAVE TO ADJUST IT TO WORK with OTHER ENVIRONMENTS THAN MINE. UNTIL THEN YOU WILL NEED AN ADDITIONAL HELPER ENTITY MANUALLY CREATED WITH OPTION "Eco", "Standard", "Super". I USED input_select.<DEVICE NAME>. I WILL UPDATE THE REPOSITORY SOON FOR THIS.
+set_&ltDEVICE NAME&gt;_workmode:        SETTING THE WORKMODE WILL BE ADDED. HAVE TO ADJUST IT TO WORK with OTHER ENVIRONMENTS THAN MINE. UNTIL THEN YOU WILL NEED AN ADDITIONAL HELPER ENTITY MANUALLY CREATED WITH OPTION "Eco", "Standard", "Super". I USED input_select.set_&ltDEVICE NAME&gt;. I WILL UPDATE THE REPOSITORY SOON FOR THIS.
 set_&ltDEVICE NAME&gt;_softon           Wake up the device from standby mode. It will return to its latest workmode automatically
 set_&ltDEVICE NAME&gt;_softoff          Activate standby mode
 set_&ltDEVICE NAME&gt;_lcdon            Turn on the LCD screen of the device
@@ -104,6 +104,7 @@ Replace \<IP-ADDRESS\> with the ip-address of your avalon q home miner<br>
 Replace \<DEVICE NAME\> with the name the miner template entites shall us as prefix. Keep it short and simple. No blanks.
 
 - Step 5: Restart home assistant and check for the new entities. They should be shown under helper entities.
+- Step 6 (optional): To ensure a clean structure create a new helper entity category "mining" and assign the new template entities to it.
 
 If you have more than one Canaan Avalon Q Home Miner you will need a copy of avalonq.yaml per device.<br>
 Make sure the above mentioned device names and of course also the file names are unique.
