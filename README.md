@@ -1,6 +1,6 @@
 # ha_avalonq
 This repository is a simple template definition to create entities for the Canaan Avalon Q Home Miner to monitor and control the device.<br>
-Using those entities it is possible to build dashboards (example not included) e.g. like this:
+Using those entities it is possible to contole the miner (workmode: Eco, Standard, Super; standby: on/off; LCD display: on/off, reboot) and build dashboards (example not included) e.g. like this:
 
 **Condensed View:**<br>
 <img width="1666" height="448" alt="grafik" src="https://github.com/user-attachments/assets/aba2b63d-e7e0-4f3e-8b0f-ce308cfd37e3" />
@@ -13,16 +13,18 @@ Using those entities it is possible to build dashboards (example not included) e
 
 
 # What it does
-The avalonq.yaml template definition file creates the following (helper) entities:
+The avalonq.yaml template definition file creates the following (helper) entities by requesting a bunch of JSON data from the miners API and use them as raw data for the following entities:
 
 **Shell Commands:**<br>
 <pre>
-set_&ltDEVICE NAME&gt;_workmode:        SETTING THE WORKMODE WILL BE ADDED. HAVE TO ADJUST IT TO WORK with OTHER ENVIRONMENTS THAN MINE. UNTIL THEN YOU WILL NEED AN ADDITIONAL HELPER ENTITY MANUALLY CREATED WITH OPTION "Eco", "Standard", "Super". I USED input_select.set_&ltDEVICE NAME&gt;. I WILL UPDATE THE REPOSITORY SOON FOR THIS.
-set_&ltDEVICE NAME&gt;_softon           Wake up the device from standby mode. It will return to its latest workmode automatically
-set_&ltDEVICE NAME&gt;_softoff          Activate standby mode
-set_&ltDEVICE NAME&gt;_lcdon            Turn on the LCD screen of the device
-set_&ltDEVICE NAME&gt;_lcdoff           Turn off the LCD screen of the device
-set_&ltDEVICE NAME&gt;_reboot           Reboot the device
+&ltDEVICE NAME&gt;_set_workmode_eco:       Set miners workmode to eco
+&ltDEVICE NAME&gt;_set_workmode_standard:  Set miners workmode to standard 
+&ltDEVICE NAME&gt;_set_workmode_super:     Set miners workmode to super
+&ltDEVICE NAME&gt;_set_softon              Wake up the device from standby mode. It will return to its latest workmode automatically
+&ltDEVICE NAME&gt;_set_softoff             Activate standby mode
+&ltDEVICE NAME&gt;_set_lcdon               Turn on the LCD screen of the device
+&ltDEVICE NAME&gt;_set_lcdoff              Turn off the LCD screen of the device
+&ltDEVICE NAME&gt;_reboot                  Reboot the device
 </pre>
   
 **Command Line Entities:**<br>
@@ -41,8 +43,11 @@ set_&ltDEVICE NAME&gt;_reboot           Reboot the device
 
 **Template Entities:**<br>
 <pre>
+&ltDEVICE NAME&gt;.auto_load_management (switch) Additional switch to include the miner in an external load management or not  
+&ltDEVICE NAME&gt;.Workmode.Set         (select) Setting the miners workmode including standby.
+&ltDEVICE NAME&gt;.Workmode.Status      (sensor) Actual workmode of the miner (Standby, Eco, Standard, Super). Syncs with state of &ltDEVICE NAME&gt;.Workmode.Set 
 &ltDEVICE NAME&gt;.LcdOnOff.Switch      (switch) Turn on/off the miners LCD display
-&ltDEVICE NAME&gt;.LcdOnOff.Status      (binary sensor) Actual status of the LCD display. Used as "state" for <DEVICE NAME>.LcdOnOff.Switch
+&ltDEVICE NAME&gt;.LcdOnOff.Status      (binary sensor) Actual status of the LCD display. Syncs with state of &ltDEVICE NAME&gt;.LcdOnOff.Switch
 &ltDEVICE NAME&gt;.Pool_Status          (binary sensor) Actual conectivity state to the mining pool
 &ltDEVICE NAME&gt;.Systemstatus         (sensor) Actual system status as a text
 &ltDEVICE NAME&gt;.State                (sensor) Actual system status as a number
@@ -72,7 +77,6 @@ set_&ltDEVICE NAME&gt;_reboot           Reboot the device
 &ltDEVICE NAME&gt;.Energy_per_TH        (sensor) Actual efficiendy in J/TH
 &ltDEVICE NAME&gt;.Ping                 (sensor) Latency (ms) to the current pool connected
 &ltDEVICE NAME&gt;.Worklevel            (sensor) Current worklevel (NOT WORKMODE). Seems not to be used. Always 0. Just kept it for research reasons
-&ltDEVICE NAME&gt;.Workmode.Status      (sensor) Actual workmode of the miner (0 = Eco, 1 = Standard, 2 = Super)
 &ltDEVICE NAME&gt;.Network_Difficulty   (sensor) Actual blockchain network difficulty
 &ltDEVICE NAME&gt;.Found_Blocks         (sensor) Miners found blocks
 &ltDEVICE NAME&gt;.Hardware_Errors      (sensor) Total number of hardware erorrs since startup
@@ -104,7 +108,9 @@ Replace \<IP-ADDRESS\> with the ip-address of your avalon q home miner<br>
 Replace \<DEVICE NAME\> with the name the miner template entites shall us as prefix. Keep it short and simple. No blanks.
 
 - Step 5: Restart home assistant and check for the new entities. They should be shown under helper entities.
-- Step 6 (optional): To ensure a clean structure create a new helper entity category "mining" and assign the new template entities to it.
+
+(optional)<br>
+- Step 6: To ensure a clean structure create a new helper entity category (e.g. "mining") and assign the new template entities to it.
 
 If you have more than one Canaan Avalon Q Home Miner you will need a copy of avalonq.yaml per device.<br>
 Make sure the above mentioned device names and of course also the file names are unique.
