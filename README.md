@@ -1,5 +1,5 @@
 # ha_avalonq
-This repository is a simple template definition to create entities for the Canaan Avalon Q Home Miner to monitor and control the device.<br>
+This repository is a simple template definition creating entities for the Canaan Avalon Q Home Miner to monitor and control the device.<br>
 Using those entities it is possible to control the miner (workmode: Eco, Standard, Super; standby: on/off; LCD display: on/off, reboot) and build dashboards (example not included) e.g. like this:
 
 **Condensed View:**<br>
