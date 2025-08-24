@@ -1,34 +1,50 @@
 miners_<DEVICE NAME>:
 
-  shell_command:
-  
-    # set miners workmode
-#    set_<DEVICE NAME>_workmode: >-
-#      /bin/bash -c "echo 'ascset|0,workmode,set,{{ {'Eco': 0, 'Standard': 1, 'Super': 2}[states('input_select.<DEVICE NAME>')] }}' | nc -w 2 <IP-ADDRESS> 4028"
+#
+# basic commands to control the miner
+#
 
-    # wake up miner from standby. It will return to it´s recent workmode
-    set_<DEVICE NAME>_softon: >-
+  shell_command:
+
+    # set miner workmode eco
+    <DEVICE NAME>_set_workmode_eco: >-
+      /bin/bash -c "echo 'ascset|0,workmode,set,0' | nc -w 2 <IP-ADDRESS> 4028"
+
+    # set miner workmode standard
+    <DEVICE NAME>_set_workmode_standard: >-
+      /bin/bash -c "echo 'ascset|0,workmode,set,1' | nc -w 2 <IP-ADDRESS> 4028"
+      
+    # set miner workmode super
+    <DEVICE NAME>_set_workmode_super: >-
+      /bin/bash -c "echo 'ascset|0,workmode,set,2' | nc -w 2 <IP-ADDRESS> 4028"
+
+    # wake up miner from standby and continue with latest workmode
+    <DEVICE NAME>_set_softon: >-
       /bin/bash -c "echo 'ascset|0,softon,1:$(( $(date +%s) + 5 ))' | nc -w 2 <IP-ADDRESS> 4028"
 
     # send miner to standby
-    set_<DEVICE NAME>_softoff: >-
+    <DEVICE NAME>_set_softoff: >-
       /bin/bash -c "echo 'ascset|0,softoff,1:$(( $(date +%s) + 5 ))' | nc -w 2 <IP-ADDRESS> 4028"
 
     # turn on LCD screen
-    set_<DEVICE NAME>_lcdon: >-
+    <DEVICE NAME>_set_lcdon: >-
       /bin/bash -c "echo 'ascset|0,lcd,0:1' | nc -w 2 <IP-ADDRESS> 4028"
 
     # turn off LCD screen
-    set_<DEVICE NAME>_lcdoff: >-
+    <DEVICE NAME>_set_lcdoff: >-
       /bin/bash -c "echo 'ascset|0,lcd,0:0' | nc -w 2 <IP-ADDRESS> 4028"
 
     # trigger reboot
-    set_<DEVICE NAME>_reboot: >-
+    <DEVICE NAME>_reboot: >-
       /bin/bash -c "echo 'ascset|0,reboot,0' | nc -w 2 <IP-ADDRESS> 4028"
 
+#
+# STEP 1: monitor the API interface and receive JSON raw-data from it
+#
+
   command_line:
-  
-      # monitors wheather the miners api interface is available
+    
+      # monitors whether the miners api interface is available
     - binary_sensor:
         unique_id: <DEVICE NAME>.Available
         name: "<DEVICE NAME>.Available"
@@ -44,7 +60,7 @@ miners_<DEVICE NAME>:
             mdi:ethernet-off
           {% endif %}
 
-    # get JSON response from cgminer command 'stats'
+    # get JSON response from cgminer 'stats' command
     - sensor: 
         unique_id: <DEVICE NAME>.api.stats
         name: "<DEVICE NAME>.api.stats"
@@ -53,7 +69,7 @@ miners_<DEVICE NAME>:
         command: >
           output=$(echo '{"command": "stats"}' | nc -w 2 <IP-ADDRESS> 4028);
           if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
-        scan_interval: 30
+        scan_interval: 15
         value_template: >
           {% if value_json is defined and value_json.STATS is defined %}
             OK
@@ -63,7 +79,7 @@ miners_<DEVICE NAME>:
         json_attributes:
           - STATS
 
-    # get JSON response from cgminer command 'litestats'
+    # get JSON response from cgminer 'litestats' command 
     - sensor: 
         unique_id: <DEVICE NAME>.api.litestats
         name: "<DEVICE NAME>.api.litestats"
@@ -82,7 +98,7 @@ miners_<DEVICE NAME>:
         json_attributes:
           - STATS
 
-    # get JSON response from cgminer command 'coin'
+    # get JSON response from cgminer 'coin' command 
     - sensor: 
         unique_id: <DEVICE NAME>.api.coin
         name: "<DEVICE NAME>.api.coin"
@@ -91,7 +107,7 @@ miners_<DEVICE NAME>:
         command: >
           output=$(echo '{"command": "coin"}' | nc -w 2 <IP-ADDRESS> 4028);
           if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
-        scan_interval: 30
+        scan_interval: 15
         value_template: >
           {% if value_json is defined and value_json.COIN is defined %}
             OK
@@ -101,7 +117,7 @@ miners_<DEVICE NAME>:
         json_attributes:
           - COIN
 
-    # get JSON response from cgminer command 'summary'
+    # get JSON response from cgminer 'summary' command 
     - sensor: 
         unique_id: <DEVICE NAME>.api.summary
         name: "<DEVICE NAME>.api.summary"
@@ -110,7 +126,7 @@ miners_<DEVICE NAME>:
         command: >
           output=$(echo '{"command": "summary"}' | nc -w 2 <IP-ADDRESS> 4028);
           if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
-        scan_interval: 30
+        scan_interval: 15
         value_template: >
           {% if value_json is defined and value_json.SUMMARY is defined %}
             OK
@@ -120,7 +136,7 @@ miners_<DEVICE NAME>:
         json_attributes:
           - SUMMARY
 
-    # get JSON response from cgminer command 'pools'
+    # get JSON response from cgminer 'pools' command 
     - sensor: 
         unique_id: <DEVICE NAME>.api.pools
         name: "<DEVICE NAME>.api.pools"
@@ -129,7 +145,7 @@ miners_<DEVICE NAME>:
         command: >
           output=$(echo '{"command": "pools"}' | nc -w 2 <IP-ADDRESS> 4028);
           if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
-        scan_interval: 30
+        scan_interval: 15
         value_template: >
           {% if value_json is defined and value_json.POOLS is defined %}
             OK
@@ -139,7 +155,7 @@ miners_<DEVICE NAME>:
         json_attributes:
           - POOLS
 
-    # get JSON response from cgminer command 'devs'
+    # get JSON response from cgminer 'devs' command 
     - sensor: 
         unique_id: <DEVICE NAME>.api.devs
         name: "<DEVICE NAME>.api.devs"
@@ -148,7 +164,7 @@ miners_<DEVICE NAME>:
         command: >
           output=$(echo '{"command": "devs"}' | nc -w 2 <IP-ADDRESS> 4028);
           if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
-        scan_interval: 30
+        scan_interval: 15
         value_template: >
           {% if value_json is defined and value_json.DEVS is defined %}
             OK
@@ -158,7 +174,7 @@ miners_<DEVICE NAME>:
         json_attributes:
           - DEVS
 
-    # get JSON response from cgminer command 'devdetails'
+    # get JSON response from cgminer 'devdetails' command 
     - sensor: 
         unique_id: <DEVICE NAME>.api.devdetails
         name: "<DEVICE NAME>.api.devdetails"
@@ -167,7 +183,7 @@ miners_<DEVICE NAME>:
         command: >
           output=$(echo '{"command": "devdetails"}' | nc -w 2 <IP-ADDRESS> 4028);
           if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
-        scan_interval: 30
+        scan_interval: 15
         value_template: >
           {% if value_json is defined and value_json.DEVDETAILS is defined %}
             OK
@@ -177,7 +193,7 @@ miners_<DEVICE NAME>:
         json_attributes:
           - DEVDETAILS
           
-    # get JSON response from cgminer command 'version'
+    # get JSON response from cgminer 'version' command 
     - sensor: 
         unique_id: <DEVICE NAME>.api.version
         name: "<DEVICE NAME>.api.version"
@@ -186,7 +202,7 @@ miners_<DEVICE NAME>:
         command: >
           output=$(echo '{"command": "version"}' | nc -w 2 <IP-ADDRESS> 4028);
           if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
-        scan_interval: 30
+        scan_interval: 15
         value_template: >
           {% if value_json is defined and value_json.VERSION is defined %}
             OK
@@ -196,7 +212,7 @@ miners_<DEVICE NAME>:
         json_attributes:
           - VERSION
 
-    # get JSON response from cgminer command 'config'
+    # get JSON response from cgminer 'config' command 
     - sensor: 
         unique_id: <DEVICE NAME>.api.config
         name: "<DEVICE NAME>.api.config"
@@ -205,7 +221,7 @@ miners_<DEVICE NAME>:
         command: >
           output=$(echo '{"command": "config"}' | nc -w 2 <IP-ADDRESS> 4028);
           if echo "$output" | jq empty >/dev/null 2>&1; then echo "$output"; fi
-        scan_interval: 30
+        scan_interval: 15
         value_template: >
           {% if value_json is defined and value_json.CONFIG is defined %}
             OK
@@ -215,23 +231,103 @@ miners_<DEVICE NAME>:
         json_attributes:
           - CONFIG
 
+  # input boolean to switch on/off auto load management used with separate automations
+  input_boolean:
+    <DEVICE NAME>_auto_load_management:
+      name: "<DEVICE NAME>.auto_load_management"
+      icon: mdi:auto-mode
+
 #
-# creates template entities extracting respective data from the JSON responses
+# STEP 2: create template entities to contol the miner and extract status values from the JSON raw data
 #
   template:
 
+    - select:
+    
+        # select template to set standby and workmode (incl. switching power supply via e.g.seperate power circuit actor)
+        - name: "<DEVICE NAME>.Workmode.Set"
+          unique_id: <DEVICE NAME>.Workmode.Set
+          icon: mdi:cog-play-outline
+          state: "{{ states('sensor.<DEVICE NAME>_workmode_status') }}"
+          options: "{{ ['Standby', 'Eco', 'Standard', 'Super'] }}"
+          availability: >
+            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
+          select_option:
+            - choose:
+                # switch to standby
+                - conditions:
+                    - condition: template
+                      value_template: "{{ option == 'Standby' }}"
+                  sequence:
+                    - action: shell_command.<DEVICE NAME>_set_softoff
+                    - delay: "00:00:01"
+                    - action: homeassistant.update_entity
+                      target:
+                        entity_id: sensor.<DEVICE NAME>_api_litestats
+
+                # set workmode Eco / Standard / Super
+                - conditions:
+                    - condition: template
+                      value_template: "{{ option in ['Eco','Standard','Super'] }}"
+                  sequence:
+                    # when coming from standby or off ensure active power circuit to the miner PSU
+                    - choose:
+                        - conditions:
+                            - condition: template
+                              value_template: >
+                                {{ states('sensor.<DEVICE NAME>_workmode_status') in ['Standby', 'Off'] }}
+
+                          sequence:
+                            # softon only (without switch for the power circuit)
+                            - action: shell_command.<DEVICE NAME>_set_softon
+                            - delay: "00:00:03"
+                            - action: homeassistant.update_entity
+                              target:
+                                entity_id: sensor.<DEVICE NAME>_api_litestats
+                                        
+                            # wait for miner to be up and running before switching to target workmode
+                            - delay: "00:01:00"
+
+                    # set target workmode
+                    - choose:
+                        - conditions:
+                            - condition: template
+                              value_template: "{{ option == 'Eco' }}"
+                          sequence:
+                            - action: shell_command.<DEVICE NAME>_set_workmode_eco
+                        - conditions:
+                            - condition: template
+                              value_template: "{{ option == 'Standard' }}"
+                          sequence:
+                            - action: shell_command.<DEVICE NAME>_set_workmode_standard
+                        - conditions:
+                            - condition: template
+                              value_template: "{{ option == 'Super' }}"
+                          sequence:
+                            - action: shell_command.<DEVICE NAME>_set_workmode_super
+
+                    # turn off LCD display
+                    - delay: "00:00:01"
+                    - action: shell_command.<DEVICE NAME>_set_lcdoff
+                    - delay: "00:00:01"
+                    - action: homeassistant.update_entity
+                      target:
+                        entity_id: sensor.<DEVICE NAME>_api_litestats                    
+
     - switch:
+    
         - unique_id: <DEVICE NAME>.LcdOnOff.Switch
           name: "<DEVICE NAME>.LcdOnOff.Switch"
+          icon: mdi:overscan
           state: "{{ is_state('binary_sensor.<DEVICE NAME>_lcdonoff_status', 'on') }}"
           turn_on:
-            - action: shell_command.set_<DEVICE NAME>_lcdon
+            - action: shell_command.<DEVICE NAME>_set_lcdon
             - delay: 1
             - action: homeassistant.update_entity
               target:
                 entity_id: sensor.<DEVICE NAME>_api_litestats
           turn_off:
-            - action: shell_command.set_<DEVICE NAME>_lcdoff
+            - action: shell_command.<DEVICE NAME>_set_lcdoff
             - delay: 1
             - action: homeassistant.update_entity
               target:
@@ -660,8 +756,8 @@ miners_<DEVICE NAME>:
             {% set summary = stats[0]["MM ID0:Summary"] if stats else "" %}
 
             {% if "Work: In Idle" in summary %}
-                Aus
-            {% else %}
+                Standby
+            {% elif "Work: In Work" in summary %}
                 {% set match = summary | regex_findall('WORKMODE\\[(\\d+)\\]') %}
                 {% if match %}
                     {% set mode = match[0] %}
@@ -671,15 +767,11 @@ miners_<DEVICE NAME>:
                         Standard
                     {% elif mode == '2' %}
                         Super
-                    {% else %}
-                        n/a
                     {% endif %}
-                {% else %}
-                    n/a
                 {% endif %}
+            {% else %}
+               Off
             {% endif %}
-        availability: >
-            {{ is_state('sensor.<DEVICE NAME>_api_litestats', 'OK') }}
 
       # current blockchain network difficulty
       - unique_id: <DEVICE NAME>.Network_Difficulty
@@ -705,6 +797,8 @@ miners_<DEVICE NAME>:
             {% set summary = state_attr('sensor.<DEVICE NAME>_api_summary', 'SUMMARY') %}
             {% if summary and 'Found Blocks' in summary[0] %}
                 {{ summary[0]['Found Blocks'] | int }}
+            {% else %}
+                0
             {% endif %}
 
       # total number of hardware errors since startup
@@ -852,7 +946,7 @@ miners_<DEVICE NAME>:
         availability: >
             {{ is_state('sensor.<DEVICE NAME>_api_version', 'OK') }}
 
-      # Firmware Version
+      # firmware version
       - unique_id: <DEVICE NAME>.Firmware
         icon: mdi:chip
         name: "<DEVICE NAME>.Firmware"
@@ -862,7 +956,7 @@ miners_<DEVICE NAME>:
         availability: >
             {{ is_state('sensor.<DEVICE NAME>_api_version', 'OK') }}
           
-      # Ethernet MAC Address of the device
+      # ethernet MAC address of the device
       - unique_id: <DEVICE NAME>.MAC_Address
         name: "<DEVICE NAME>.MAC_Address"
         icon: mdi:ethernet
