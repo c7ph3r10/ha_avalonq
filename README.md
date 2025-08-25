@@ -17,9 +17,9 @@ The avalonq.yaml template definition file creates the following (helper) entitie
 
 **Shell Commands:**<br>
 <pre>
-&ltDEVICE NAME&gt;_set_workmode_eco:       Set miners workmode to eco
-&ltDEVICE NAME&gt;_set_workmode_standard:  Set miners workmode to standard 
-&ltDEVICE NAME&gt;_set_workmode_super:     Set miners workmode to super
+&ltDEVICE NAME&gt;_set_workmode_eco        Set miners workmode to eco
+&ltDEVICE NAME&gt;_set_workmode_standard   Set miners workmode to standard 
+&ltDEVICE NAME&gt;_set_workmode_super      Set miners workmode to super
 &ltDEVICE NAME&gt;_set_softon              Wake up the device from standby mode. It will return to its latest workmode automatically
 &ltDEVICE NAME&gt;_set_softoff             Activate standby mode
 &ltDEVICE NAME&gt;_set_lcdon               Turn on the LCD screen of the device
