@@ -99,7 +99,7 @@ The avalonq.yaml template definition file creates the following (helper) entitie
 - Step 2: Add the following lines to your configuration.yaml<br>
 <pre>
 homeassistant:
-  packages: !include_dir_merge_named packages/
+  packages: !include_dir_merge_named packages
 </pre>
 - Step 3: Copy avalonq.yaml from this repository to the packages folder.
 - Step 4: Do the following search/replace within the avalonq.yaml to adjust it to your environment
